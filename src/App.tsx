@@ -37,10 +37,11 @@ import {
   Moon,
   Sun,
   Sparkles,
-  Camera
+  Camera,
+  Ghost
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { toPng } from 'html-to-image';
+// import { toPng } from 'html-to-image';
 
 // --- Types ---
 
@@ -136,8 +137,7 @@ const SOCIAL_PLATFORMS = [
   { name: 'Instagram', icon: Instagram, slug: 'instagram' },
   { name: 'TikTok', icon: MessageCircle, slug: 'tiktok' },
   { name: 'X', icon: Twitter, slug: 'x' },
-  { name: 'Snapchat', icon: MessageCircle, slug: 'snapchat' },
-  { name: 'LinkedIn', icon: Linkedin, slug: 'linkedin' },
+  { name: 'Snapchat', icon: Ghost, slug: 'snapchat' },
   { name: 'YouTube', icon: Youtube, slug: 'youtube' },
   { name: 'Facebook', icon: Facebook, slug: 'facebook' },
   { name: 'WhatsApp', icon: MessageCircle, slug: 'whatsapp' },
@@ -196,24 +196,23 @@ const PRESETS: Record<string, { data?: Partial<SignatureData>, styles: Partial<S
 };
 
 const DEFAULT_DATA: SignatureData = {
-  name: 'John Doe',
-  title: 'Creative Director',
-  mobile: '+1 (555) 000-0000',
-  email: 'john.doe@example.com',
-  websiteLabel: 'example.com',
-  websiteUrl: 'https://example.com',
-  location: 'New York, NY',
-  profileImage: 'https://picsum.photos/seed/profile/200/200',
-  bannerImage: 'https://picsum.photos/seed/banner/800/200',
-  bannerUrl: 'https://example.com',
+  name: 'Your Name',
+  title: 'Your Job Title',
+  mobile: '+1 (000) 000-0000',
+  email: 'hello@yourdomain.com',
+  websiteLabel: 'yourwebsite.com',
+  websiteUrl: 'https://yourwebsite.com',
+  location: 'City, Country',
+  profileImage: 'https://picsum.photos/seed/sig-profile/200/200',
+  bannerImage: 'https://picsum.photos/seed/sig-banner/800/200',
+  bannerUrl: 'https://yourwebsite.com',
   bannerAlt: 'Signature Banner',
-  tagline: 'Building the future of design',
-  companyName: 'Design Studio',
+  tagline: 'Your inspiring tagline goes here',
+  companyName: 'Your Company Name',
   socials: [
-    { id: '1', platform: 'Instagram', url: 'https://instagram.com/johndoe', enabled: true },
-    { id: '2', platform: 'TikTok', url: 'https://tiktok.com/@johndoe', enabled: true },
-    { id: '3', platform: 'LinkedIn', url: 'https://linkedin.com/in/johndoe', enabled: true },
-    { id: '4', platform: 'X', url: 'https://twitter.com/johndoe', enabled: true },
+    { id: '1', platform: 'Instagram', url: 'https://instagram.com/', enabled: true },
+    { id: '2', platform: 'Snapchat', url: 'https://snapchat.com/add/', enabled: true },
+    { id: '3', platform: 'X', url: 'https://twitter.com/', enabled: true },
   ],
 };
 
@@ -265,20 +264,20 @@ const DEFAULT_STYLES: SignatureStyles = {
 const ColorPicker = ({ label, value, onChange }: { label: string, value: string, onChange: (val: string) => void }) => (
   <div className="flex flex-col gap-1.5">
     <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{label}</label>
-    <div className="flex items-center gap-2">
-      <div className="relative w-10 h-10 rounded-lg border border-zinc-200 overflow-hidden shadow-sm">
+    <div className="group relative flex items-center gap-2 p-1 bg-white border border-zinc-200 rounded-xl hover:border-blue-400 transition-all focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500">
+      <div className="relative w-8 h-8 rounded-lg border border-zinc-100 overflow-hidden shadow-inner flex-shrink-0">
         <input 
           type="color" 
           value={value} 
           onChange={(e) => onChange(e.target.value)}
-          className="absolute inset-0 w-[150%] h-[150%] -translate-x-1/4 -translate-y-1/4 cursor-pointer"
+          className="absolute inset-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4 cursor-pointer"
         />
       </div>
       <input 
         type="text" 
         value={value} 
         onChange={(e) => onChange(e.target.value)}
-        className="flex-1 px-3 py-2 text-sm bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono"
+        className="flex-1 px-2 py-1.5 text-sm bg-transparent border-none focus:outline-none focus:ring-0 font-mono font-bold text-zinc-700"
       />
     </div>
   </div>
@@ -445,6 +444,7 @@ export default function App() {
   const downloadPNG = async () => {
     if (previewRef.current) {
       try {
+        const { toPng } = await import('html-to-image');
         const dataUrl = await toPng(previewRef.current, {
           cacheBust: true,
           style: {
@@ -459,6 +459,7 @@ export default function App() {
         link.click();
       } catch (err) {
         console.error('oops, something went wrong!', err);
+        alert('Failed to generate PNG. Please try again.');
       }
     }
   };
@@ -501,6 +502,9 @@ export default function App() {
     
     const s = styles;
 
+    const imageRadius = s.iconShape === 'circle' ? '50%' : 
+                        s.iconShape === 'rounded' ? '8px' : '0px';
+
     const iconStyle = (platform: string) => {
       let bg = s.iconBgColor;
       let color = s.iconColor;
@@ -516,7 +520,7 @@ export default function App() {
         border = 'none';
       }
 
-      const radiusValue = s.iconShape === 'circle' ? `${s.buttonSize / 2}px` : 
+    const radiusValue = s.iconShape === 'circle' ? '50%' : 
                           s.iconShape === 'pill' ? '20px' : 
                           s.iconShape === 'rounded' ? `${s.iconBorderRadius}px` : '0px';
 
@@ -545,7 +549,7 @@ export default function App() {
               <tr>
                 <!-- Profile Image -->
                 <td style="vertical-align: middle; width: 100px;">
-                  <img src="${profileImage}" alt="${name}" width="100" height="100" style="border-radius: 50px; display: block; width: 100px; height: 100px; min-width: 100px; min-height: 100px; max-width: 100px; max-height: 100px; object-fit: cover;" />
+                  <img src="${profileImage}" alt="${name}" width="100" height="100" style="border-radius: ${imageRadius}; display: block; width: 100px; height: 100px; min-width: 100px; min-height: 100px; max-width: 100px; max-height: 100px; object-fit: cover;" />
                 </td>
                 
                 <!-- Divider -->
