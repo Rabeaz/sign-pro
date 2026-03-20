@@ -1052,32 +1052,6 @@ export default function App() {
             </div>
           </motion.div>
         </div>
-
-        {/* HTML Code View (Optional/Bonus) */}
-        <div className="p-8 pt-0">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-zinc-950 rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
-              <div className="px-6 py-4 bg-white/5 border-b border-white/5 flex items-center justify-between">
-                <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Generated HTML Source</span>
-                <button 
-                  onClick={() => {
-                    navigator.clipboard.writeText(generateHTML(true));
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 2000);
-                  }}
-                  className="text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2"
-                >
-                  <Copy className="w-3 h-3" /> Copy Code
-                </button>
-              </div>
-              <div className="p-6 overflow-x-auto">
-                <pre className="text-[11px] font-mono text-zinc-400 leading-relaxed">
-                  {generateHTML(true).trim()}
-                </pre>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
