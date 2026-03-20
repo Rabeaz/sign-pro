@@ -50,6 +50,8 @@ interface SocialIcon {
   platform: string;
   url: string;
   enabled: boolean;
+  color?: string;
+  bgColor?: string;
 }
 
 interface SignatureData {
@@ -135,6 +137,7 @@ const FONT_FAMILIES = [
 
 const SOCIAL_PLATFORMS = [
   { name: 'Instagram', icon: Instagram, slug: 'instagram' },
+  { name: 'LinkedIn', icon: Linkedin, slug: 'linkedin' },
   { name: 'TikTok', icon: MessageCircle, slug: 'tiktok' },
   { name: 'X', icon: Twitter, slug: 'x' },
   { name: 'Snapchat', icon: Ghost, slug: 'snapchat' },
@@ -210,9 +213,9 @@ const DEFAULT_DATA: SignatureData = {
   tagline: 'Your inspiring tagline goes here',
   companyName: 'Your Company Name',
   socials: [
-    { id: '1', platform: 'Instagram', url: 'https://instagram.com/', enabled: true },
-    { id: '2', platform: 'Snapchat', url: 'https://snapchat.com/add/', enabled: true },
-    { id: '3', platform: 'X', url: 'https://twitter.com/', enabled: true },
+    { id: '1', platform: 'Instagram', url: 'https://instagram.com/', enabled: true, color: '#ffffff', bgColor: '#E1306C' },
+    { id: '2', platform: 'Snapchat', url: 'https://snapchat.com/add/', enabled: true, color: '#000000', bgColor: '#FFFC00' },
+    { id: '3', platform: 'X', url: 'https://twitter.com/', enabled: true, color: '#ffffff', bgColor: '#000000' },
   ],
 };
 
@@ -407,7 +410,9 @@ export default function App() {
       id: Math.random().toString(36).substr(2, 9),
       platform: 'Instagram',
       url: '',
-      enabled: true
+      enabled: true,
+      color: '#ffffff',
+      bgColor: styles.accentColor
     };
     setData(prev => ({ ...prev, socials: [...prev.socials, newSocial] }));
   };
@@ -505,18 +510,18 @@ export default function App() {
     const imageRadius = s.iconShape === 'circle' ? '50%' : 
                         s.iconShape === 'rounded' ? '8px' : '0px';
 
-    const iconStyle = (platform: string) => {
-      let bg = s.iconBgColor;
-      let color = s.iconColor;
+    const iconStyle = (soc: SocialIcon) => {
+      let bg = soc.bgColor || s.iconBgColor;
+      let color = soc.color || s.iconColor;
       let border = `1px solid ${s.iconBorderColor}`;
       
       if (s.iconStyle === 'outline') {
         bg = 'transparent';
-        color = s.iconBgColor;
-        border = `1px solid ${s.iconBgColor}`;
+        color = soc.bgColor || s.iconBgColor;
+        border = `1px solid ${soc.bgColor || s.iconBgColor}`;
       } else if (s.iconStyle === 'plain') {
         bg = 'transparent';
-        color = s.iconBgColor;
+        color = soc.bgColor || s.iconBgColor;
         border = 'none';
       }
 
@@ -592,15 +597,15 @@ export default function App() {
                 const slug = platform?.slug || 'globe';
                 
                 // Determine icon color based on style
-                let iconHex = s.iconColor.replace('#', '');
+                let iconHex = (soc.color || s.iconColor).replace('#', '');
                 if (s.iconStyle === 'outline' || s.iconStyle === 'plain') {
-                  iconHex = s.iconBgColor.replace('#', '');
+                  iconHex = (soc.bgColor || s.iconBgColor).replace('#', '');
                 }
                 
                 const iconUrl = `https://cdn.simpleicons.org/${slug}/${iconHex}`;
                 
                 return `
-                  <a href="${soc.url}" style="${iconStyle(soc.platform)}">
+                  <a href="${soc.url}" style="${iconStyle(soc)}">
                     <img src="${iconUrl}" width="${s.iconSize}" height="${s.iconSize}" style="display: inline-block; vertical-align: middle; border: 0; width: ${s.iconSize}px; height: ${s.iconSize}px;" />
                   </a>
                 `;
@@ -714,48 +719,6 @@ export default function App() {
                   <Plus className="w-4 h-4" /> Import
                   <input type="file" className="hidden" accept=".json" onChange={importSettings} />
                 </label>
-              </div>
-            </div>
-          </Section>
-
-          {/* Presets */}
-          <Section title="Quick Presets" icon={Sparkles} defaultOpen>
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Master Brand Color</label>
-                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
-                  <div className="relative w-12 h-12 rounded-full border-2 border-white overflow-hidden shadow-md">
-                    <input 
-                      type="color" 
-                      value={styles.accentColor} 
-                      onChange={(e) => updateBrandColor(e.target.value)}
-                      className="absolute inset-0 w-[150%] h-[150%] -translate-x-1/4 -translate-y-1/4 cursor-pointer"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-bold text-blue-600 uppercase tracking-tight">Theme Sync</p>
-                    <p className="text-[10px] text-blue-400">Updates icons, links, and accents</p>
-                  </div>
-                  <div className="text-xs font-mono font-bold text-blue-600 bg-white px-2 py-1 rounded-md border border-blue-100">
-                    {styles.accentColor.toUpperCase()}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-4 gap-2">
-                {Object.keys(PRESETS).map(name => (
-                  <button 
-                    key={name}
-                    onClick={() => applyPreset(name)}
-                    title={name}
-                    className="group relative aspect-square rounded-xl border border-zinc-200 overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-sm"
-                    style={{ backgroundColor: PRESETS[name].styles.accentColor || '#007AFF' }}
-                  >
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                      <Check className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  </button>
-                ))}
               </div>
             </div>
           </Section>
@@ -890,6 +853,32 @@ export default function App() {
                     placeholder="Profile URL..."
                     className="w-full px-3 py-1.5 text-xs bg-white border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase">Icon</label>
+                      <div className="flex items-center gap-2 p-1 bg-white border border-zinc-200 rounded-lg">
+                        <input 
+                          type="color" 
+                          value={soc.color || styles.iconColor} 
+                          onChange={(e) => updateSocial(soc.id, 'color', e.target.value)}
+                          className="w-6 h-6 rounded cursor-pointer"
+                        />
+                        <span className="text-[10px] font-mono text-zinc-500">{(soc.color || styles.iconColor).toUpperCase()}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-zinc-400 uppercase">Background</label>
+                      <div className="flex items-center gap-2 p-1 bg-white border border-zinc-200 rounded-lg">
+                        <input 
+                          type="color" 
+                          value={soc.bgColor || styles.iconBgColor} 
+                          onChange={(e) => updateSocial(soc.id, 'bgColor', e.target.value)}
+                          className="w-6 h-6 rounded cursor-pointer"
+                        />
+                        <span className="text-[10px] font-mono text-zinc-500">{(soc.bgColor || styles.iconBgColor).toUpperCase()}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))}
               <button 

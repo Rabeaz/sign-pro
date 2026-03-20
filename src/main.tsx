@@ -3,16 +3,24 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-// Fix for environments where window.fetch is read-only
-try {
-  if (typeof window !== 'undefined' && !window.fetch) {
-    // Only attempt to define if it's missing, but the error suggests it's a getter.
-    // We can't easily fix a read-only getter, but we can try to wrap the app
-    // or ensure no library tries to overwrite it.
+// Fix for environments where window.fetch is read-only and some library tries to overwrite it
+(function() {
+  try {
+    const originalFetch = window.fetch;
+    if (originalFetch) {
+      Object.defineProperty(window, 'fetch', {
+        get() { return originalFetch; },
+        set() { 
+          console.warn('An attempt to overwrite window.fetch was blocked to prevent a TypeError.');
+        },
+        configurable: true,
+        enumerable: true
+      });
+    }
+  } catch (e) {
+    console.warn('Could not wrap window.fetch:', e);
   }
-} catch (e) {
-  console.warn('Could not check/fix window.fetch:', e);
-}
+})();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
